@@ -1,0 +1,11 @@
+    
+{
+  "journey": {
+    "departureStop": "60859",
+    "destinationStop": null.
+	"agency": "SC"
+  },
+  "511Api": {
+    "apiKey": "yourKey"
+  }
+}
