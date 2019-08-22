@@ -9,6 +9,8 @@ myStop = state.Stop()
 
 import dateutil.parser
 from datetime import datetime, timedelta
+from pytz import timezone
+pac_tz = timezone('America/Los_Angeles')
 
 class App(WinForms.Form):
     def __init__(self):
@@ -48,6 +50,7 @@ class App(WinForms.Form):
 
     def button_Click(self, sender, args):
         print ("Click")
+
         refresh(self)
         #WinForms.MessageBox.Show("Need to Refresh from Server Here.")
 
@@ -64,9 +67,11 @@ def refresh(form):
         form.departCount.Text = str(departureCount) + " buses in range"
         form.textbox.Text = ""
         for nextDeparture in iter(departures):
-            delta = dateutil.parser.parse(nextDeparture.time) - dateutil.parser.parse(myStop.time)
+            nextTime = dateutil.parser.parse(nextDeparture.time)
+            delta =  nextTime - dateutil.parser.parse(myStop.time)
             nextBusMinutes =  delta.seconds/60
-            form.textbox.Text = form.textbox.Text +"\n " + str(round(nextBusMinutes, 0)) + " min @ " + nextDeparture.time
+            pac_dt = pac_tz.normalize(nextTime.astimezone(pac_tz))
+            form.textbox.Text = form.textbox.Text +"\n " + nextDeparture.destination_name + " in " + str(round(nextBusMinutes, 0)) + " min @ " + str(pac_dt)
     else:
         form.departCount.Text = "0"
         form.textbox.Text = "No current bus"
