@@ -6,61 +6,60 @@ def loadConfig():
     with open('config.json', 'r') as jsonConfig:
         return json.load(jsonConfig)
 
-config = loadConfig()
-# print (config)
+myConfig = loadConfig()
+myApiKey = myConfig["511Api"]["apiKey"]
 
-def loadDeparturesForStop (apiKey,journeyConfig):
-    if journeyConfig["departureStop"] == "":
-        raise ValueError(
-            "Please set the journey.departureStop property in config.json")
+def loadDeparturesForStop (myRefresh, myAgency,myStopCode):
+    if myStopCode == "":
+        raise ValueError("Please set the journey.departureStop property in config.json")
 
-    if apiKey == "":
-        raise ValueError(
-            "Please complete the 511Api section of your config.json file")
+    if myApiKey == "":
+        raise ValueError("Please complete the 511Api section of your config.json file")
 
-    departureStop = journeyConfig["departureStop"]
+    myStopCache = "data\\" + myStopCode + ".json"
 
-    localStop = "data\\" + departureStop + ".json"
-
-    if os.path.exists(localStop):
-        print ("using cached stop for " + departureStop)
-        with open(localStop, 'r') as f:
-            data = json.load(f)
+    if os.path.exists(myStopCache) and not myRefresh:
+        print ("using cached stop for " + myStopCode)
+        with open(myStopCache, 'r') as f:
+            myResponseJson = json.load(f)
     else:
         URL = f"http://api.511.org/transit/StopMonitoring"
 
-        PARAMS = {'api_key': apiKey,
-                  'agency': journeyConfig["agency"],
-                  'stopCode': departureStop}
+        PARAMS = {'api_key': myApiKey,
+                  'agency': myAgency,
+                  'stopCode': myStopCode}
 
-        r = requests.get(url=URL, params=PARAMS, headers={'content-type':'application/json'})
-        r.encoding = 'utf-8-sig'
-        data = json.loads(r.text)
+        myResponse = requests.get(url=URL, params=PARAMS, headers={'content-type':'application/json'})
+        myResponse.encoding = 'utf-8-sig'
+        myResponseJson = json.loads(myResponse.text)
 
-        if "error" in data:
-           raise ValueError(data["error"])
+        if "error" in myResponseJson:
+           raise ValueError(myResponseJson["error"])
         else:
-            with open(localStop, "a") as f:
-                json.dump(data,f)
+            with open(myStopCache, "a") as f:
+                json.dump(myResponse.text,f)
 
-    return data["ServiceDelivery"]["StopMonitoringDelivery"]["MonitoredStopVisit"], \
-           data["ServiceDelivery"]["ResponseTimestamp"]
+    return myResponseJson["ServiceDelivery"]["StopMonitoringDelivery"]["MonitoredStopVisit"], \
+           myResponseJson["ServiceDelivery"]["ResponseTimestamp"]
 
-def loadStop(apiConfig, journeyConfig):
-    departures, timestamp = loadDeparturesForStop(apiConfig["apiKey"],journeyConfig)
+def loadStop(myRefresh,myAgency,myStopCode):
+    departures, timestamp = loadDeparturesForStop(myRefresh,myAgency,myStopCode)
 
     if len(departures) == 0:
         return False, False, timestamp
 
-    firstTrip = departures[0]
-    name = firstTrip["MonitoredVehicleJourney"]["MonitoredCall"]["StopPointName"]
+    name = departures[0]["MonitoredVehicleJourney"]["MonitoredCall"]["StopPointName"]
 
     return name, departures, timestamp
 
 class Stop():
     def __init__(self):
-        self.code = config.get("journey").get("departureStop")
-        self.name, departures, self.time = loadStop(config["511Api"], config["journey"])
+        self.code = myConfig.get("journey").get("departureStop")
+        self.agency = myConfig.get("journey").get("agency")
+        self.refresh(False)
+
+    def refresh(self,refresh):
+        self.name, departures, self.time = loadStop(refresh,self.agency,self.code)
         self.departures = list()
         for departure in iter(departures):
             self.departures.append(Departure(departure))

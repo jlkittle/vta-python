@@ -51,8 +51,8 @@ class App(WinForms.Form):
     def button_Click(self, sender, args):
         print ("Click")
 
+        myStop.refresh(True)
         refresh(self)
-        #WinForms.MessageBox.Show("Need to Refresh from Server Here.")
 
     def run(self):
         WinForms.Application.Run(self)
