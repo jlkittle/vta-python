@@ -36,8 +36,8 @@ def loadDeparturesForStop (myRefresh, myAgency,myStopCode):
         if "error" in myResponseJson:
            raise ValueError(myResponseJson["error"])
         else:
-            with open(myStopCache, "a") as f:
-                json.dump(myResponse.text,f)
+            with open(myStopCache, "w") as f:
+                json.dump(myResponseJson,f)
 
     return myResponseJson["ServiceDelivery"]["StopMonitoringDelivery"]["MonitoredStopVisit"], \
            myResponseJson["ServiceDelivery"]["ResponseTimestamp"]

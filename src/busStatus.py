@@ -4,13 +4,13 @@ SWF = clr.AddReference("System.Windows.Forms")
 import System.Windows.Forms as WinForms
 from System.Drawing import Size, Point
 
-import state
-myStop = state.Stop()
-
 import dateutil.parser
 from datetime import datetime, timedelta
 from pytz import timezone
 pac_tz = timezone('America/Los_Angeles')
+
+import state
+myStop = state.Stop()
 
 class App(WinForms.Form):
     def __init__(self):
@@ -32,7 +32,7 @@ class App(WinForms.Form):
 
         self.departCount = WinForms.Label()
         self.departCount.Text = "departure count"
-        self.departCount.Size = Size(200, 40)
+        self.departCount.Size = Size(400, 40)
         self.departCount.Location = Point(8, 12)
 
         # Create the text box
@@ -60,18 +60,21 @@ class App(WinForms.Form):
 def refresh(form):
     form.Text = "VTA Bus @ " + myStop.name + " (" + myStop.code + ")"
     #print (departures)
-    departures = myStop.departures
+    myDepartures = myStop.departures
 
-    if departures:
-        departureCount = len(departures)
-        form.departCount.Text = str(departureCount) + " buses in range"
+    if myDepartures:
+        myDepartureCount = len(myDepartures)
+        myBaseTime = dateutil.parser.parse(myStop.time)
+        myBaseTimeLocal = pac_tz.normalize(myBaseTime.astimezone(pac_tz))
+        form.departCount.Text = str(myDepartureCount) + " buses in range on " + str(myBaseTimeLocal) #.strftime("%A, %B %d, %Y @ %I:%m%p")
         form.textbox.Text = ""
-        for nextDeparture in iter(departures):
-            nextTime = dateutil.parser.parse(nextDeparture.time)
-            delta =  nextTime - dateutil.parser.parse(myStop.time)
-            nextBusMinutes =  delta.seconds/60
-            pac_dt = pac_tz.normalize(nextTime.astimezone(pac_tz))
-            form.textbox.Text = form.textbox.Text +"\n " + nextDeparture.destination_name + " in " + str(round(nextBusMinutes, 0)) + " min @ " + str(pac_dt)
+        for myNextDeparture in iter(myDepartures):
+            myNextTime = dateutil.parser.parse(myNextDeparture.time)
+            myDelta =  myNextTime - myBaseTime
+            myNextBusMinutes =  myDelta.seconds/60
+            myNextBusTimeLocal = pac_tz.normalize(myNextTime.astimezone(pac_tz))
+            myNextBusStr = myNextDeparture.destination_name + " in " + str(round(myNextBusMinutes)) + " min @ " + str(myNextBusTimeLocal) #.strftime("%I:%m%p")
+            form.textbox.Text = form.textbox.Text +"\n " + myNextBusStr
     else:
         form.departCount.Text = "0"
         form.textbox.Text = "No current bus"
