@@ -54,21 +54,21 @@ def loadStop(myRefresh,myAgency,myStopCode):
 
 class Stop():
     def __init__(self):
-        self.code = myConfig.get("journey").get("departureStop")
+        self.departureStopCode = myConfig.get("journey").get("departureStop")
         self.agency = myConfig.get("journey").get("agency")
-        self.destinationStop = myConfig.get("journey").get("destinationStop")
+        self.destinationStopCode = myConfig.get("journey").get("destinationStop")
         self.refresh(False)
 
     def refresh(self,refresh):
-        self.name, departures, self.time = loadStop(refresh,self.agency,self.code)
+        self.name, departures, self.time = loadStop(refresh,self.agency,self.departureStopCode)
         self.departures = list()
         for departure in iter(departures):
             self.departures.append(Departure(departure))
 
     def reverse(self):
-        oldCode = self.code
-        self.code = self.destinationStop
-        self.destinationStop = oldCode
+        tmpCode = self.departureStopCode
+        self.departureStopCode= self.destinationStopCode
+        self.destinationStopCode = tmpCode
         self.refresh(True)
 
 class Departure():

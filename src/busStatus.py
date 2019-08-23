@@ -58,12 +58,11 @@ class App(WinForms.Form):
         self.Controls.Add(self.departCount)
 
     def button_Click(self, sender, args):
-        print (sender)
+        #print (sender)
         if sender.Text == "Reverse":
-            if myStop.destinationStop == "":
+            if myStop.destinationStopCode == "":
                 raise ValueError("Please set the journey.destinationStop property in config.json")
             else:
-                print("Need to reverse stops")
                 myStop.reverse()
         else:
             myStop.refresh(True)
@@ -74,9 +73,9 @@ class App(WinForms.Form):
         WinForms.Application.Run(self)
 
 def refresh(form):
-    form.Text = "VTA Bus @ " + myStop.name + " (" + myStop.code + ")"
+    form.Text = "VTA Bus @ " + myStop.name + " (" + myStop.departureStopCode + ")"
 
-    if myStop.destinationStop is None:
+    if myStop.destinationStopCode is None:
         print ("No Destination Specified")
         form.button2.Visible = False
 
@@ -100,9 +99,9 @@ def refresh(form):
 
 def main():
     form = App()
-    print ("form created")
+    #print ("form created")
     app = WinForms.Application
-    print ("app referenced")
+    #print ("app referenced")
     refresh(form)
     app.Run(form)
 
