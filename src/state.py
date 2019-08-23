@@ -9,7 +9,7 @@ def loadConfig():
 myConfig = loadConfig()
 myApiKey = myConfig["511Api"]["apiKey"]
 
-def loadDeparturesForStop (myRefresh, myAgency,myStopCode):
+def loadDeparturesForStop (myRefresh, myAgency, myStopCode):
     if myStopCode == "":
         raise ValueError("Please set the journey.departureStop property in config.json")
 
@@ -56,6 +56,7 @@ class Stop():
     def __init__(self):
         self.code = myConfig.get("journey").get("departureStop")
         self.agency = myConfig.get("journey").get("agency")
+        self.destinationStop = myConfig.get("journey").get("destinationStop")
         self.refresh(False)
 
     def refresh(self,refresh):
@@ -63,6 +64,12 @@ class Stop():
         self.departures = list()
         for departure in iter(departures):
             self.departures.append(Departure(departure))
+
+    def reverse(self):
+        oldCode = self.code
+        self.code = self.destinationStop
+        self.destinationStop = oldCode
+        self.refresh(True)
 
 class Departure():
     def __init__(self,departure):

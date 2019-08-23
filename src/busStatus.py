@@ -20,15 +20,23 @@ class App(WinForms.Form):
         h = WinForms.SystemInformation.CaptionHeight
         self.MinimumSize = Size(200, (200 + h))
 
-        # Create the button
+        # Create the 1st button
         self.button = WinForms.Button()
         self.button.Location = Point(32, 140)
         self.button.Size = Size(100, 20)
         self.button.TabIndex = 2
         self.button.Text = "Refresh"
-
         # Register the event handler
         self.button.Click += self.button_Click
+
+        # Create the 1st button
+        self.button2 = WinForms.Button()
+        self.button2.Location = Point(232, 140)
+        self.button2.Size = Size(100, 20)
+        self.button2.TabIndex = 2
+        self.button2.Text = "Reverse"
+        # Register the event handler
+        self.button2.Click += self.button_Click
 
         self.departCount = WinForms.Label()
         self.departCount.Text = "departure count"
@@ -45,13 +53,21 @@ class App(WinForms.Form):
         # Add the controls to the form
         self.AcceptButton = self.button
         self.Controls.Add(self.button)
+        self.Controls.Add(self.button2)
         self.Controls.Add(self.textbox)
         self.Controls.Add(self.departCount)
 
     def button_Click(self, sender, args):
-        print ("Click")
+        print (sender)
+        if sender.Text == "Reverse":
+            if myStop.destinationStop == "":
+                raise ValueError("Please set the journey.destinationStop property in config.json")
+            else:
+                print("Need to reverse stops")
+                myStop.reverse()
+        else:
+            myStop.refresh(True)
 
-        myStop.refresh(True)
         refresh(self)
 
     def run(self):
@@ -59,9 +75,12 @@ class App(WinForms.Form):
 
 def refresh(form):
     form.Text = "VTA Bus @ " + myStop.name + " (" + myStop.code + ")"
-    #print (departures)
-    myDepartures = myStop.departures
 
+    if myStop.destinationStop is None:
+        print ("No Destination Specified")
+        form.button2.Visible = False
+
+    myDepartures = myStop.departures
     if myDepartures:
         myDepartureCount = len(myDepartures)
         myBaseTime = dateutil.parser.parse(myStop.time)
