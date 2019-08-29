@@ -9,13 +9,18 @@ import state
 myStop = state.Stop()
 
 def RefreshClicked():
-    print("Refresh Clicked")
+    myStop.refresh(True)
+    refresh(myForm)
 
 def ReverseClicked():
-    print("Reverse Clicked")
+    if myStop.destinationStopCode == "":
+        raise ValueError("Please set the journey.destinationStop property in config.json")
+    else:
+        myStop.reverse()
+        refresh(myForm)
 
 def refresh(myForm):
-    myForm.Title = "VTA Bus @ " + myStop.name + " (" + myStop.departureStopCode + ")"
+    myForm.title ="VTA Bus @ " + myStop.name + " (" + myStop.departureStopCode + ")"
 
     if myStop.destinationStopCode is None:
         print ("No Destination Specified")
@@ -26,33 +31,44 @@ def refresh(myForm):
         myDepartureCount = len(myDepartures)
         myBaseTime = dateutil.parser.parse(myStop.time)
         myBaseTimeLocal = pac_tz.normalize(myBaseTime.astimezone(pac_tz))
-        myLabelDepart.Text = str(myDepartureCount) + " buses in range on " + str(myBaseTimeLocal) #.strftime("%A, %B %d, %Y @ %I:%m%p")
-        myBusStatus.Text = ""
+        myLabelDepartText = str(myDepartureCount) + " buses in range on " + str(myBaseTimeLocal) #.strftime("%A, %B %d, %Y @ %I:%m%p")
+        myLabelDepartVar.set(myLabelDepartText)
+
+        myBusStatusText = ""
         for myNextDeparture in iter(myDepartures):
             myNextTime = dateutil.parser.parse(myNextDeparture.time)
             myDelta =  myNextTime - myBaseTime
             myNextBusMinutes =  myDelta.seconds/60
             myNextBusTimeLocal = pac_tz.normalize(myNextTime.astimezone(pac_tz))
             myNextBusStr = myNextDeparture.destination_name + " in " + str(round(myNextBusMinutes)) + " min @ " + str(myNextBusTimeLocal) #.strftime("%I:%m%p")
-            myBusStatus.Text =  myBusStatus.Text +"\n " + myNextBusStr
+            myBusStatusText =  myBusStatusText +"\n " + myNextBusStr
+        myBusStatusText += "\n\n"
+        myBusStatusVar.set(myBusStatusText)
     else:
-        myLabelDepart.Text = "0"
-        myForm.BusStatus.Text = "No current bus"
+        myLabelDepartVar.set = "0 buses in range"
+        myBusStatusVar.set("No current bus")
+
+    myForm.update_idletasks()
 
 myForm = Tk()
 myForm.title("VTA Next Bus")
-myForm.geometry("350x200")
-myLabelDepart = Label(myForm, text="departure count")
+myForm.geometry("400x200")
+
+myLabelDepartVar = StringVar()
+myLabelDepartVar.set("departure count")
+myLabelDepart = Label(myForm, textvariable=myLabelDepartVar)
 myLabelDepart.grid(column=0,row=0)
 
-myBusStatus = Label(myForm, text="bus status")
-myBusStatus.grid(column=1,row=1)
+myBusStatusVar = StringVar()
+myBusStatusVar.set("bus status")
+myBusStatus = Label(myForm, textvariable=myBusStatusVar)
+myBusStatus.grid(column=0,row=1)
 
 myButtonRefresh = Button(myForm, text="Refresh", command=RefreshClicked)
-myButtonRefresh.grid(column=1,row=2)
+myButtonRefresh.grid(column=0,row=2)
 
 myButtonReverse = Button(myForm, text="Reverse", command=ReverseClicked)
-myButtonReverse.grid(column=2,row=2)
+myButtonReverse.grid(column=1,row=2)
 
 refresh(myForm)
 myForm.mainloop()
