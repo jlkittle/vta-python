@@ -1,6 +1,10 @@
 import json
 import requests
 import os
+import dateutil.parser
+from datetime import datetime, timedelta
+from pytz import timezone
+pac_tz = timezone('America/Los_Angeles')
 
 def loadConfig():
     with open('config.json', 'r') as jsonConfig:
@@ -64,6 +68,31 @@ class Stop():
         self.departures = list()
         for departure in iter(departures):
             self.departures.append(Departure(departure))
+
+    def status(self):
+        myTitle = "VTA Bus @ " + self.name + " (" + self.departureStopCode + ")"
+
+        myDepartures = self.departures
+        if myDepartures:
+            myDepartureCount = len(myDepartures)
+            myBaseTime = dateutil.parser.parse(self.time)
+            myBaseTimeLocal = pac_tz.normalize(myBaseTime.astimezone(pac_tz))
+            myLabelDepartText = str(myDepartureCount) + " buses in range on " + str(myBaseTimeLocal) #.strftime("%A, %B %d, %Y @ %I:%m%p")
+
+            myBusStatusText = ""
+            for myNextDeparture in iter(myDepartures):
+                myNextTime = dateutil.parser.parse(myNextDeparture.time)
+                myDelta =  myNextTime - myBaseTime
+                myNextBusMinutes =  myDelta.seconds/60
+                myNextBusTimeLocal = pac_tz.normalize(myNextTime.astimezone(pac_tz))
+                myNextBusStr = myNextDeparture.destination_name + " in " + str(round(myNextBusMinutes)) + " min @ " + str(myNextBusTimeLocal) #.strftime("%I:%m%p")
+                myBusStatusText =  myBusStatusText +"\n " + myNextBusStr
+            myBusStatusText += "\n\n"
+        else:
+            myLabelDepartText = "0 buses in range"
+            myBusStatusText = "No current bus"
+
+        return myTitle, myLabelDepartText, myBusStatusText
 
     def reverse(self):
         tmpCode = self.departureStopCode

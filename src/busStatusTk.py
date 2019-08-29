@@ -1,10 +1,5 @@
 from tkinter import *
 
-import dateutil.parser
-from datetime import datetime, timedelta
-from pytz import timezone
-pac_tz = timezone('America/Los_Angeles')
-
 import state
 myStop = state.Stop()
 
@@ -20,39 +15,21 @@ def ReverseClicked():
         refresh(myForm)
 
 def refresh(myForm):
-    myForm.title ="VTA Bus @ " + myStop.name + " (" + myStop.departureStopCode + ")"
+    myTitle, myLabelDepartText, myBusDeparture = myStop.status()
+
+    myForm.title = myTitle
+    myLabelDepartVar.set(myLabelDepartText)
+    myBusStatusVar.set(myBusDeparture)
 
     if myStop.destinationStopCode is None:
         print ("No Destination Specified")
         myButtonReverse.Visible = False
 
-    myDepartures = myStop.departures
-    if myDepartures:
-        myDepartureCount = len(myDepartures)
-        myBaseTime = dateutil.parser.parse(myStop.time)
-        myBaseTimeLocal = pac_tz.normalize(myBaseTime.astimezone(pac_tz))
-        myLabelDepartText = str(myDepartureCount) + " buses in range on " + str(myBaseTimeLocal) #.strftime("%A, %B %d, %Y @ %I:%m%p")
-        myLabelDepartVar.set(myLabelDepartText)
-
-        myBusStatusText = ""
-        for myNextDeparture in iter(myDepartures):
-            myNextTime = dateutil.parser.parse(myNextDeparture.time)
-            myDelta =  myNextTime - myBaseTime
-            myNextBusMinutes =  myDelta.seconds/60
-            myNextBusTimeLocal = pac_tz.normalize(myNextTime.astimezone(pac_tz))
-            myNextBusStr = myNextDeparture.destination_name + " in " + str(round(myNextBusMinutes)) + " min @ " + str(myNextBusTimeLocal) #.strftime("%I:%m%p")
-            myBusStatusText =  myBusStatusText +"\n " + myNextBusStr
-        myBusStatusText += "\n\n"
-        myBusStatusVar.set(myBusStatusText)
-    else:
-        myLabelDepartVar.set = "0 buses in range"
-        myBusStatusVar.set("No current bus")
-
     myForm.update_idletasks()
 
 myForm = Tk()
 myForm.title("VTA Next Bus")
-myForm.geometry("400x200")
+myForm.geometry("500x200")
 
 myLabelDepartVar = StringVar()
 myLabelDepartVar.set("departure count")
