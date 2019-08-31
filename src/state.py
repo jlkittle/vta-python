@@ -14,20 +14,20 @@ myConfig = loadConfig()
 myApiKey = myConfig["511Api"]["apiKey"]
 
 def loadDeparturesForStop (myRefresh, myAgency, myStopCode):
-    if myStopCode == "":
+    if not myStopCode:
         raise ValueError("Please set the journey.departureStop property in config.json")
 
-    if myApiKey == "":
+    if not myApiKey:
         raise ValueError("Please complete the 511Api section of your config.json file")
 
-    myStopCache = "data\\" + myStopCode + ".json"
+    myStopCache = os.path.join("data", myStopCode + ".json")
 
     if os.path.exists(myStopCache) and not myRefresh:
         print ("using cached stop for " + myStopCode)
         with open(myStopCache, 'r') as f:
             myResponseJson = json.load(f)
     else:
-        URL = f"http://api.511.org/transit/StopMonitoring"
+        URL = "http://api.511.org/transit/StopMonitoring"
 
         PARAMS = {'api_key': myApiKey,
                   'agency': myAgency,

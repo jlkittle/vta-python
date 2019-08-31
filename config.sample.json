@@ -1,8 +1,7 @@
-    
 {
   "journey": {
     "departureStop": "60859",
-    "destinationStop": null.
+    "destinationStop": null,
 	"agency": "SC"
   },
   "511Api": {

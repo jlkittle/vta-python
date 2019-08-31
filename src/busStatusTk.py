@@ -8,7 +8,7 @@ def RefreshClicked():
     refresh(myForm)
 
 def ReverseClicked():
-    if myStop.destinationStopCode == "":
+    if not myStop.destinationStopCode:
         raise ValueError("Please set the journey.destinationStop property in config.json")
     else:
         myStop.reverse()
