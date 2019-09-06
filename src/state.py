@@ -77,7 +77,7 @@ class Stop():
             myDepartureCount = len(myDepartures)
             myBaseTime = dateutil.parser.parse(self.time)
             myBaseTimeLocal = pac_tz.normalize(myBaseTime.astimezone(pac_tz))
-            myLabelDepartText = str(myDepartureCount) + " buses in range on " + str(myBaseTimeLocal) #.strftime("%A, %B %d, %Y @ %I:%m%p")
+            myLabelDepartText = str(myDepartureCount) + " buses in range on " + myBaseTimeLocal.ctime() #.strftime("%A, %B %d, %Y @ %I:%m%p")
 
             myBusStatusText = ""
             for myNextDeparture in iter(myDepartures):
@@ -85,7 +85,7 @@ class Stop():
                 myDelta =  myNextTime - myBaseTime
                 myNextBusMinutes =  myDelta.seconds/60
                 myNextBusTimeLocal = pac_tz.normalize(myNextTime.astimezone(pac_tz))
-                myNextBusStr = myNextDeparture.destination_name + " in " + str(round(myNextBusMinutes)) + " min @ " + str(myNextBusTimeLocal) #.strftime("%I:%m%p")
+                myNextBusStr = myNextDeparture.destination_name + " in " + str(round(myNextBusMinutes)) + " min @ " + myNextBusTimeLocal.ctime() #.strftime("%I:%m%p")
                 myBusStatusText =  myBusStatusText +"\n " + myNextBusStr
             myBusStatusText += "\n\n"
         else:
