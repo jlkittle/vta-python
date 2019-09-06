@@ -77,7 +77,13 @@ class Stop():
             myDepartureCount = len(myDepartures)
             myBaseTime = dateutil.parser.parse(self.time)
             myBaseTimeLocal = pac_tz.normalize(myBaseTime.astimezone(pac_tz))
-            myLabelDepartText = str(myDepartureCount) + " buses in range on " + myBaseTimeLocal.ctime() #.strftime("%A, %B %d, %Y @ %I:%m%p")
+            print (myBaseTimeLocal.ctime())
+            print (myBaseTimeLocal.strftime("%A, %B %d, %Y @ %I:%m%p"))
+            print (datetime.strftime(myBaseTimeLocal, "%A, %B %d, %Y @ %I:%m%p"))
+            print (myBaseTime)
+            print (myBaseTime.ctime())
+            print (myBaseTime.strftime("%A, %B %d, %Y @ %I:%m%p"))
+            myLabelDepartText = self.name + " (" + self.departureStopCode + ") " + str(myDepartureCount) + " buses in range on " + myBaseTimeLocal.ctime() #.strftime("%A, %B %d, %Y @ %I:%m%p")
 
             myBusStatusText = ""
             for myNextDeparture in iter(myDepartures):
